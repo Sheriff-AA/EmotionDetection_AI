@@ -43,3 +43,50 @@ print(dataset1.describe())
 print(dataset1["right_eye_center_x"].max())
 print(dataset1["right_eye_center_x"].min())
 print(dataset1["right_eye_center_x"].sum()/ len(dataset1["right_eye_center_x"]))
+
+
+# IMAGE VISUALISATION
+
+# Plot a random image from the dataset along with facial keypoints
+# Image data is plotted using imshow
+# 15 x and y coordinates for each image
+# x co-ordinates are in even columns, and y co-ordinates are in odd columns
+
+i = np.random.randint(1, len(dataset1))
+plt.imshow(dataset1["Image"][i], cmap="gray")
+for j in range(1, 31, 2):
+    plt.plot(dataset1.loc[i][j-1], dataset1.loc[i][j], "rx")
+    
+# Viweing more images in grid format
+fig = plt.figure(figsize=(20, 20))
+
+for i in range(16):
+    fig.add_subplot(4, 4, i+1)
+    plt.imshow(dataset1["Image"][i], cmap="gray")
+    for j in range(1, 31, 2):
+        plt.plot(dataset1.loc[i][j-1], dataset1.loc[i][j], "rx")  # "rx" = red colour, x
+        
+
+# SANITY CHECK - Randomly visualising 64 images with their corresponding key points
+fig2 = plt.figure(figsize=(20, 20))
+
+for i in range(64):
+    fig2.add_subplot(8, 8, i+1)
+    j = np.random.randint(1, len(dataset1))
+    plt.imshow(dataset1["Image"][j], cmap="gray")
+    for k in range(1, 31, 2):
+        plt.plot(dataset1.loc[j][k-1], dataset1.loc[j][k], "rx")
+
+
+# IMAGE AUGMENTATION
+
+dataset1_copy = copy.copy(dataset1)
+
+columns = dataset1_copy.columns[:-1]
+
+# Horizontal flip - Flip Images along y axis
+dataset1_copy["Image"] = dataset1_copy["Image"].apply(lambda x: np.flip(x, axis = 1))
+
+for i in range(len(columns)):
+    if i%2 == 0:
+        dataset1_copy[columns[i]] = dataset1_copy[columns[i]].apply(lambda x: 96. - float(x))
