@@ -12,11 +12,15 @@ Created on Fri Mar  5 19:32:44 2021
 # IMPORTING LIBRARIES
 import pandas as pd
 import numpy as np
+import matplotlib.pyplot as plt
+import copy
 import os
 import PIL
 # import seaborn as sns
 import pickle
 from PIL import *
+
+
 
 # IMPORTING DATASET
 dataset1 = pd.read_csv("data.csv")
@@ -45,8 +49,8 @@ print(dataset1["right_eye_center_x"].min())
 print(dataset1["right_eye_center_x"].sum()/ len(dataset1["right_eye_center_x"]))
 
 
-# IMAGE VISUALISATION
 
+# IMAGE VISUALISATION
 # Plot a random image from the dataset along with facial keypoints
 # Image data is plotted using imshow
 # 15 x and y coordinates for each image
@@ -79,14 +83,24 @@ for i in range(64):
 
 
 # IMAGE AUGMENTATION
-
-dataset1_copy = copy.copy(dataset1)
-
+dataset1_copy = copy.deepcopy(dataset1)
 columns = dataset1_copy.columns[:-1]
 
 # Horizontal flip - Flip Images along y axis
 dataset1_copy["Image"] = dataset1_copy["Image"].apply(lambda x: np.flip(x, axis = 1))
 
+# y coordinate values would be the same
 for i in range(len(columns)):
     if i%2 == 0:
         dataset1_copy[columns[i]] = dataset1_copy[columns[i]].apply(lambda x: 96. - float(x))
+
+# Show the Original Image
+plt.imshow(dataset1["Image"][0], cmap="gray")
+for j in range(1, 31, 2):
+    plt.plot(dataset1.loc[0][j-1], dataset1.loc[0][j], "rx")
+
+
+# Show the Horizontally flipped image
+plt.imshow(dataset1_copy["Image"][0], cmap="gray")
+for j in range(1, 31, 2):
+    plt.plot(dataset1_copy.loc[0][j-1], dataset1_copy.loc[0][j], "rx")
