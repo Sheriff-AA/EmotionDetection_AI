@@ -13,12 +13,14 @@ Created on Fri Mar  5 19:32:44 2021
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
+from sklearn.model_selection import train_test_split
 import copy
 import os
 import PIL
-# import seaborn as sns
+import seaborn as sns
 import pickle
 from PIL import *
+import random
 
 
 
@@ -104,3 +106,78 @@ for j in range(1, 31, 2):
 plt.imshow(dataset1_copy["Image"][0], cmap="gray")
 for j in range(1, 31, 2):
     plt.plot(dataset1_copy.loc[0][j-1], dataset1_copy.loc[0][j], "rx")
+
+
+# Concatenate the original dataframe with augmented dataframe
+augmented_ds = np.concatenate((dataset1, dataset1_copy))
+print(augmented_ds.shape)
+
+
+# Increasing brightness of images
+dataset1_copy = copy.deepcopy(dataset1)
+dataset1_copy["Image"] = dataset1["Image"].apply(lambda x:np.clip(random.uniform(1.5, 2)* x, 0.0, 255.0))
+augmented_ds = np.concatenate((augmented_ds, dataset1_copy))
+print(augmented_ds.shape)
+
+plt.imshow(dataset1_copy["Image"][0], cmap="gray")
+for j in range(1, 31, 2):
+    plt.plot(dataset1_copy.loc[0][j-1], dataset1_copy.loc[0][j], "rx")
+
+
+# MINI CHALLENGE 3 & 4 
+# Flipping images vertically
+dataset1_copy = copy.deepcopy(dataset1)
+columns = dataset1_copy.columns[:-1]
+
+dataset1_copy["Image"] = dataset1_copy["Image"].apply(lambda x: np.flip(x, axis=0))
+
+for i in range(len(columns)):
+    if i%2 != 0:
+        dataset1_copy[columns[i]] = dataset1_copy[columns[i]].apply(lambda x: 96 - float(x))
+
+# SANITY CHECK
+plt.imshow(dataset1_copy["Image"][0], cmap="gray")
+for j in range(1, 31, 2):
+    plt.plot(dataset1_copy.loc[0][j-1], dataset1_copy.loc[0][j], "rx")
+
+
+# PERFORM DATA NORMALIZATION AND SPLITTING INTO TRAINING AND TEST SET
+# Obtaining the image values in the 31st column
+images = augmented_ds[:,30]
+
+# Normalize the images
+images = images/255
+X = np.empty((len(images), 96, 96, 1))  # creating an empty array of 6420 rows, each will be 96 by 96 by 1
+
+for i in range(len(images)):
+    X[i,] = np.expand_dims(images[i], axis=2)
+
+# convert array to float32
+X = np.asarray(X).astype(np.float32)
+print(X.shape)
+
+y = augmented_ds[:,:30]
+y = np.asarray(y).astype(np.float32)    # converting to float 32
+print(y.shape)
+
+# Splitting the data into train and test data
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
